@@ -5,6 +5,7 @@
 // *****************************************************************
 // *****************************************************************
 // *****************************************************************
+using Adaptive.Recruitment.TradeOrders.System;
 using System;
 using System.Diagnostics;
 
@@ -15,6 +16,7 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
         private decimal _price;
         private int _volume;
         private ITradeBooker _tradeBooker;
+        private static readonly object padlock = new object();
         public string Symbol { get; private set; }
 
         public OrderDirection Direction { get; private set; }
@@ -44,12 +46,11 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
 
         public void OnPriceTick(string stockSymbol, decimal price)
         {
-            lock (_tradeBooker)
+            lock (padlock)
             {
-                if (Symbol.Equals(stockSymbol))
+                if (Status == OrderStatus.Active)
                 {
-
-                    if (Status == OrderStatus.Active)
+                    if (Symbol.Equals(stockSymbol))
                     {
                         try
                         {
