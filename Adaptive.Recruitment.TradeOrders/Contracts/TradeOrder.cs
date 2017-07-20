@@ -13,10 +13,14 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
 {
     public class TradeOrder : ITradeOrder
     {
+        #region Fields
         private decimal _price;
         private int _volume;
         private ITradeBooker _tradeBooker;
         private static readonly object padlock = new object();
+        #endregion
+
+        #region Properties
         public string Symbol { get; private set; }
 
         public OrderDirection Direction { get; private set; }
@@ -24,10 +28,14 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
         public OrderType Type { get; private set; }
 
         public OrderStatus Status { get; private set; }
+        #endregion
 
+        #region Events
         public event EventHandler<TradeFailureEventArgs> TradeFailure;
         public event EventHandler TradeSuccess;
+        #endregion
 
+        #region Constructor
         public TradeOrder(OrderType type, OrderDirection direction, string symbol, decimal price, int volume, ITradeBooker tradeBooker)
         {
             Symbol = symbol;
@@ -38,7 +46,9 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
             _price = price;
             _tradeBooker = tradeBooker;
         }
+        #endregion
 
+        #region Public Methods
         public void Cancel()
         {
             Status = OrderStatus.Cancelled;
@@ -54,18 +64,7 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
                     {
                         try
                         {
-                            if (Direction == OrderDirection.Buy && price <= _price)
-                            {
-                                _tradeBooker.Buy(stockSymbol, _volume, price);
-                                Status = OrderStatus.Completed;
-                                OnTradeSuccess();
-                            }
-                            if (Direction == OrderDirection.Sell && price >= _price)
-                            {
-                                _tradeBooker.Sell(stockSymbol, _volume, price);
-                                Status = OrderStatus.Completed;
-                                OnTradeSuccess();
-                            }
+                            ExecuteOrder(stockSymbol, price);
                         }
                         catch (Exception ex)
                         {
@@ -75,6 +74,34 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
                     }
                 }
             }
+        }
+        #endregion
+
+        #region Private/Protected methods
+        private void ExecuteOrder(string stockSymbol, decimal price)
+        {
+            if (Direction == OrderDirection.Buy && price <= _price)
+            {
+                Buy(stockSymbol, price);
+            }
+            if (Direction == OrderDirection.Sell && price >= _price)
+            {
+                Sell(stockSymbol, price);
+            }
+        }
+
+        private void Sell(string stockSymbol, decimal price)
+        {
+            _tradeBooker.Sell(stockSymbol, _volume, price);
+            Status = OrderStatus.Completed;
+            OnTradeSuccess();
+        }
+
+        private void Buy(string stockSymbol, decimal price)
+        {
+            _tradeBooker.Buy(stockSymbol, _volume, price);
+            Status = OrderStatus.Completed;
+            OnTradeSuccess();
         }
 
         protected void OnTradeSuccess()
@@ -89,11 +116,8 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
         protected void OnTradeFailure(TradeFailureEventArgs e)
         {
             EventHandler<TradeFailureEventArgs> handler = TradeFailure;
-            if (handler != null)
-            {
-                handler(this, e);
-            }
-        }
+            handler?.Invoke(this, e);
+        } 
+        #endregion
     }
-
 }

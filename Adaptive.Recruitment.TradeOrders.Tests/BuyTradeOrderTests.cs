@@ -10,7 +10,7 @@ namespace Adaptive.Recruitment.TradeOrders.Tests
     {
         [Theory]
         [MemberData(nameof(ReturnsExpectedResponseData))]
-        public void When_Price_Is_Bellow_Limit_Buy(string symbol, decimal price, decimal sellPrice, OrderStatus status)
+        public void When_Price_Is_Bellow_Limit_Sell(string symbol, decimal price, decimal sellPrice, OrderStatus status)
         {
             ITradeBooker tradeBroker = new TradeBooker();
             TradeOrder testOrder = new TradeOrder(OrderType.Limit, OrderDirection.Buy, symbol, price, 50, tradeBroker);
