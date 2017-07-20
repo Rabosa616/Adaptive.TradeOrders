@@ -11,5 +11,15 @@ namespace Adaptive.Recruitment.TradeOrders.Tests
             decimal next = Convert.ToDecimal(random.NextDouble());
             return minValue + (next * (maxValue - minValue));
         }
+
+        public static decimal RandomReminderTwoNumberIsCeroBetween(int minValue, int maxValue)
+        {
+            decimal result = random.Next(minValue, maxValue);
+            while (result % 2 != 0)
+            {
+                result = random.Next(minValue, maxValue);
+            }
+            return result;
+        }
     }
 }

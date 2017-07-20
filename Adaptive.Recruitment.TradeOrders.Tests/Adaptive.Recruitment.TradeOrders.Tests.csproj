@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuyTradeOrderTests.cs" />
+    <Compile Include="CancelTradeOrderTest.cs" />
     <Compile Include="DecimalHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SellTradeOrderTests.cs" />
