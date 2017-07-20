@@ -1,19 +1,23 @@
 ﻿using Adaptive.Recruitment.TradeOrders.Contracts;
 using Adaptive.Recruitment.TradeOrders.System;
 using System.Collections.Generic;
+using FluentAssertions;
 using Xunit;
 
 namespace Adaptive.Recruitment.TradeOrders.Tests
 {
     public class BuyTradeOrderTests
     {
-        // TODO - add unit tests
         [Theory]
         [MemberData(nameof(ReturnsExpectedResponseData))]
-        public void When_Price_Is_Bellow_Limit_Buy(string symbol, decimal price, decimal sellPrice)
+        public void When_Price_Is_Bellow_Limit_Buy(string symbol, decimal price, decimal sellPrice, OrderStatus status)
         {
             ITradeBooker tradeBroker = new TradeBooker();
-            TradeOrder test = new TradeOrder(OrderType.Limit, OrderDirection.Sell, symbol, price, 50, tradeBroker);
+            TradeOrder testOrder = new TradeOrder(OrderType.Limit, OrderDirection.Buy, symbol, price, 50, tradeBroker);
+
+            testOrder.OnPriceTick(symbol,sellPrice);
+
+            testOrder.Status.Should().Be(status);
 
         }
 
@@ -21,9 +25,8 @@ namespace Adaptive.Recruitment.TradeOrders.Tests
         {
             get
             {
-                yield return new object[] { "AAPL", 100, DecimalHelper.RandomNumberBetween(0,200) };
-                yield return new object[] { "AAPL", 100, DecimalHelper.RandomNumberBetween(0,100) };
-                yield return new object[] { "AAPL", 100, DecimalHelper.RandomNumberBetween(101,200) };
+                yield return new object[] { "AAPL", 100, DecimalHelper.RandomNumberBetween(0,100), OrderStatus.Completed };
+                yield return new object[] { "AAPL", 100, DecimalHelper.RandomNumberBetween(101,200), OrderStatus.Active };
             }
         }
     }
