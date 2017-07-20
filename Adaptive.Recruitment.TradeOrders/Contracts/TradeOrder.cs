@@ -45,6 +45,8 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
             _volume = volume;
             _price = price;
             _tradeBooker = tradeBooker;
+            TradeSuccess = (s, e) => { return; };
+            TradeFailure = (s, e) => { return; };
         }
         #endregion
 
@@ -56,11 +58,11 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
 
         public void OnPriceTick(string stockSymbol, decimal price)
         {
-            lock (padlock)
+            if (Symbol.Equals(stockSymbol) && Status == OrderStatus.Active)
             {
-                if (Status == OrderStatus.Active)
+                lock (padlock)
                 {
-                    if (Symbol.Equals(stockSymbol))
+                    if (Status == OrderStatus.Active )
                     {
                         try
                         {
@@ -117,7 +119,7 @@ namespace Adaptive.Recruitment.TradeOrders.Contracts
         {
             EventHandler<TradeFailureEventArgs> handler = TradeFailure;
             handler?.Invoke(this, e);
-        } 
+        }
         #endregion
     }
 }
